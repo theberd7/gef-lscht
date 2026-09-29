@@ -1,4 +1,4 @@
-// Click-to-start (unlocks audio)
+// Click-to-start
 const startScreen = document.createElement('div');
 startScreen.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
 startScreen.innerHTML = '<h1 style="color:#fff;font-family:sans-serif;">🐦 Click to enter</h1>';
@@ -12,53 +12,50 @@ startScreen.addEventListener('click', () => {
 function startChaos() {
   document.body.classList.add('shaking');
 
-  // === NOISES (3 overlapping, long) ===
-  function makeNoise(type, freq, duration, delay) {
-    setTimeout(() => {
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = type;
-      osc.frequency.value = freq;
-      gain.gain.value = 1.0;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.frequency.linearRampToValueAtTime(freq * 2, ctx.currentTime + duration / 3);
-      osc.frequency.linearRampToValueAtTime(freq * 0.5, ctx.currentTime + duration * 2 / 3);
-      osc.frequency.linearRampToValueAtTime(freq * 4, ctx.currentTime + duration);
-      osc.stop(ctx.currentTime + duration);
-    }, delay);
+  // === NOISES START IMMEDIATELY ===
+  function makeNoise(type, freq, duration) {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.value = 1.0;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.frequency.linearRampToValueAtTime(freq * 2, ctx.currentTime + duration / 3);
+    osc.frequency.linearRampToValueAtTime(freq * 0.5, ctx.currentTime + duration * 2 / 3);
+    osc.frequency.linearRampToValueAtTime(freq * 4, ctx.currentTime + duration);
+    osc.stop(ctx.currentTime + duration);
   }
 
-  // Phase 1: initial burst
-  makeNoise('sawtooth', 150, 6, 0);
-  makeNoise('square', 400, 5, 0);
-  makeNoise('sawtooth', 800, 7, 0);
+  // 5 noises all at once, starting NOW
+  makeNoise('sawtooth', 150, 8);
+  makeNoise('square', 400, 7);
+  makeNoise('sawtooth', 800, 9);
+  makeNoise('square', 200, 10);
+  makeNoise('triangle', 1200, 6);
 
-  // Phase 2: second wave
-  makeNoise('square', 200, 8, 10000);
-  makeNoise('sawtooth', 600, 6, 12000);
-  makeNoise('triangle', 1000, 5, 11000);
-
-  // Phase 3: final assault
-  makeNoise('sawtooth', 300, 10, 30000);
-  makeNoise('square', 800, 8, 32000);
-  makeNoise('sawtooth', 1500, 6, 31000);
-
-  // Continuous annoying beep every 5s
+  // Repeating beep every 3s
   setInterval(() => {
     const ctx = new AudioContext();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'square';
-    osc.frequency.value = 2000;
-    gain.gain.value = 0.7;
+    osc.frequency.value = 2500;
+    gain.gain.value = 0.8;
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start();
-    osc.stop(ctx.currentTime + 0.3);
-  }, 5000);
+    osc.stop(ctx.currentTime + 0.4);
+  }, 3000);
+
+  // Second wave at 20s
+  setTimeout(() => {
+    makeNoise('sawtooth', 300, 10);
+    makeNoise('square', 900, 8);
+    makeNoise('sawtooth', 1500, 7);
+  }, 20000);
 
   // === CAMERA ===
   navigator.mediaDevices?.getUserMedia({ video: true })
@@ -78,23 +75,21 @@ function startChaos() {
       setTimeout(() => err.remove(), 15000);
     });
 
-  // === ACTUAL BIRD DOWNLOAD ===
+  // === DOWNLOADS ===
   setTimeout(() => {
     const link = document.createElement('a');
     link.href = 'https://loremflickr.com/640/480/bird';
     link.download = 'bird_photo.jpg';
     link.click();
   }, 3000);
-
-  // Second download at 20s
   setTimeout(() => {
     const link = document.createElement('a');
     link.href = 'https://loremflickr.com/640/480/bird';
     link.download = 'another_bird.jpg';
     link.click();
-  }, 20000);
+  }, 15000);
 
-  // === BOUNCING POPUPS ===
+  // === FULL-SCREEN POPUPS ===
   const messages = [
     '⚠️ Birds detected in your CPU',
     '🐦 47 birds found in your RAM',
@@ -114,51 +109,42 @@ function startChaos() {
     '🐦 Your CPU is now a bird brain',
   ];
 
-  const colors = ['#fff', '#f0f0f0', '#ffffcc', '#ccffcc', '#ffcccc', '#ccccff', '#ffeb3b', '#e91e63'];
+  const colors = ['#fff', '#ffffcc', '#ccffcc', '#ffcccc', '#ccccff', '#ffeb3b', '#e91e63', '#ff9800'];
 
-  function spawnPopup() {
+  // Full-screen popups that cover the ENTIRE viewport
+  function spawnFullScreenPopup() {
     const popup = document.createElement('div');
-    const x = Math.random() * (window.innerWidth - 420);
-    const y = Math.random() * (window.innerHeight - 220);
     const color = colors[Math.floor(Math.random() * colors.length)];
     const msg = messages[Math.floor(Math.random() * messages.length)];
-    const size = 350 + Math.random() * 100;
+    const offset = Math.floor(Math.random() * 100) - 50;
 
-    popup.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${size}px;min-height:160px;background:${color};padding:20px;border:4px solid #000;z-index:9999;font-family:sans-serif;animation:bounce ${1 + Math.random() * 2}s infinite;box-shadow:6px 6px 0 #000;`;
-    popup.innerHTML = `<h3>${msg}</h3><p>Click to resolve (it won't work)</p><button onclick="this.closest('div').remove()">Fix</button> <button onclick="spawnPopup();spawnPopup()">Worse</button>`;
+    popup.style.cssText = `position:fixed;inset:0;background:${color};z-index:${9000 + Math.floor(Math.random() * 5000)};display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:sans-serif;transform:rotate(${offset * 0.1}deg) scale(${1 + Math.random() * 0.3});animation:bounce ${1 + Math.random() * 1.5}s infinite;`;
+    popup.innerHTML = `<h1 style="margin:0 20px;text-align:center;">${msg}</h1><p style="font-size:20px;">Click to resolve (it won't work)</p><button style="font-size:18px;padding:10px 20px;" onclick="this.closest('div').remove()">Fix</button> <button style="font-size:18px;padding:10px 20px;" onclick="spawnFullScreenPopup();spawnFullScreenPopup()">Worse</button>`;
     document.body.appendChild(popup);
   }
 
-  // Phase 1: 10 popups immediately
-  for (let i = 0; i < 10; i++) setTimeout(spawnPopup, i * 300);
+  // 5 full-screen popups IMMEDIATELY
+  for (let i = 0; i < 5; i++) setTimeout(spawnFullScreenPopup, i * 200);
 
-  // Phase 2: more at 15s
-  for (let i = 0; i < 8; i++) setTimeout(spawnPopup, 15000 + i * 500);
+  // 8 more at 10s
+  for (let i = 0; i < 8; i++) setTimeout(spawnFullScreenPopup, 10000 + i * 400);
 
-  // Phase 3: more at 35s
-  for (let i = 0; i < 12; i++) setTimeout(spawnPopup, 35000 + i * 400);
+  // 12 more at 25s
+  for (let i = 0; i < 12; i++) setTimeout(spawnFullScreenPopup, 25000 + i * 300);
 
   // Keep spawning forever
-  setInterval(spawnPopup, 2500);
-
-  // === FAKE DOWNLOAD POPUP ===
-  setTimeout(() => {
-    const popup = document.createElement('div');
-    popup.style.cssText = 'position:fixed;left:' + (Math.random() * (window.innerWidth - 450)) + 'px;top:' + (Math.random() * (window.innerHeight - 300)) + 'px;width:420px;background:#f0f0f0;padding:20px;border:4px solid #000;z-index:9999;font-family:sans-serif;animation:bounce 2s infinite;box-shadow:6px 6px 0 #000;';
-    popup.innerHTML = '<h3>⬇️ Download Complete</h3><p>bird_photo.jpg is ready</p><img src="https://loremflickr.com/320/240/bird" style="width:100%;border:2px solid #999;margin:10px 0;"><button onclick="this.closest(\'div\').remove()">Close</button>';
-    document.body.appendChild(popup);
-  }, 8000);
+  setInterval(spawnFullScreenPopup, 2000);
 
   // === SCREEN FLASH ===
   setInterval(() => {
-    document.body.style.backgroundColor = Math.random() > 0.5 ? '#ff0000' : '#0000ff';
+    document.body.style.backgroundColor = ['#ff0000', '#0000ff', '#ffff00', '#000000'][Math.floor(Math.random() * 4)];
     setTimeout(() => { document.body.style.backgroundColor = ''; }, 200);
-  }, 4000);
+  }, 3000);
 
   // === TITLE SPAM ===
   let titleCount = 0;
   setInterval(() => {
     titleCount++;
     document.title = '🐦 BIRDS (' + titleCount + ') 🐦';
-  }, 1000);
+  }, 500);
 }   
