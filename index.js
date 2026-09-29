@@ -76,18 +76,23 @@ function startChaos() {
     });
 
   // === DOWNLOADS ===
-  setTimeout(() => {
-    const link = document.createElement('a');
-    link.href = 'https://loremflickr.com/640/480/bird';
-    link.download = 'bird_photo.jpg';
-    link.click();
-  }, 3000);
-  setTimeout(() => {
-    const link = document.createElement('a');
-    link.href = 'https://loremflickr.com/640/480/bird';
-    link.download = 'another_bird.jpg';
-    link.click();
-  }, 15000);
+function downloadBird(filename) {
+  fetch('https://loremflickr.com/640/480/bird')
+    .then(r => r.blob())
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+}
+
+// First download at 3s
+setTimeout(() => downloadBird('bird_photo.jpg'), 3000);
+// Second download at 15s
+setTimeout(() => downloadBird('another_bird.jpg'), 15000);   );
 
   // === FULL-SCREEN POPUPS ===
   const messages = [
