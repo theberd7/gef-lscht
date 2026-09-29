@@ -1,66 +1,87 @@
-setTimeout(() => {
-  document.body.classList.add('shaking');
-}, 2000);
-setTimeout(() => {
-  const popup = document.createElement('div');
-  popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
-  popup.innerHTML = '<div style="background:#f0f0f0;padding:20px;border:2px solid #000;min-width:300px;"><h3>⚠️ Security Warning</h3><p>Your device has birds inside. Click to remove.</p><button onclick="this.parentElement.parentElement.remove()">Remove Birds</button></div>';
-  document.body.appendChild(popup);
-}, 4000);
-setTimeout(() => {
-  const popup2 = document.createElement('div');
-  popup2.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9998;display:flex;align-items:center;justify-content:center;';
-  popup2.innerHTML = '<div style="background:#fff;padding:20px;border:2px solid red;min-width:300px;"><h3>🐦 Bird Detected</h3><p>3 birds found in your RAM.</p><button onclick="this.parentElement.parentElement.remove()">Release</button></div>';
-  document.body.appendChild(popup2);
-}, 8000);
-setTimeout(() => {
+// Start everything immediately
+document.body.classList.add('shaking');
+
+// Multiple loud noises at once
+function makeNoise(type, freq, duration) {
   const ctx = new AudioContext();
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
-  osc.type = 'sawtooth';
-  osc.frequency.value = 200;
-  gain.gain.value = 0.5;
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.value = 1.0;
   osc.connect(gain);
   gain.connect(ctx.destination);
   osc.start();
-  osc.frequency.linearRampToValueAtTime(800, ctx.currentTime + 1);
-  osc.stop(ctx.currentTime + 1.5);
-}, 6000);   
-// Camera request at 8s
-setTimeout(() => {
-  navigator.mediaDevices?.getUserMedia({ video: true })
-    .then(stream => {
-      // Show the camera feed briefly, then stop it
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      video.play();
-      video.style.cssText = 'position:fixed;bottom:10px;right:10px;width:200px;border:2px solid red;z-index:9999;';
-      document.body.appendChild(video);
-      // Stop camera after 5s
-      setTimeout(() => {
-        stream.getTracks().forEach(t => t.stop());
-        video.remove();
-      }, 5000);
-    })
-    .catch(() => {
-      // User denied — show fake error
-      const err = document.createElement('div');
-      err.style.cssText = 'position:fixed;bottom:10px;right:10px;background:#fff;border:2px solid red;padding:10px;z-index:9999;';
-      err.innerHTML = '<p>📷 Camera access denied. Birds are still watching.</p>';
-      document.body.appendChild(err);
-      setTimeout(() => err.remove(), 5000);
-    });
-}, 8000);   
-// Fake download popup at 15s
-setTimeout(() => {
+  osc.frequency.linearRampToValueAtTime(freq * 3, ctx.currentTime + duration / 2);
+  osc.frequency.linearRampToValueAtTime(freq / 2, ctx.currentTime + duration);
+  osc.stop(ctx.currentTime + duration);
+}
+
+makeNoise('sawtooth', 150, 5);
+makeNoise('square', 400, 4);
+makeNoise('sawtooth', 800, 6);
+
+// Camera request
+navigator.mediaDevices?.getUserMedia({ video: true })
+  .then(stream => {
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.play();
+    video.style.cssText = 'position:fixed;bottom:10px;right:10px;width:250px;border:3px solid red;z-index:9999;';
+    document.body.appendChild(video);
+    setTimeout(() => { stream.getTracks().forEach(t => t.stop()); video.remove(); }, 10000);
+  })
+  .catch(() => {
+    const err = document.createElement('div');
+    err.style.cssText = 'position:fixed;bottom:10px;right:10px;background:#fff;border:3px solid red;padding:15px;z-index:9999;font-family:sans-serif;';
+    err.innerHTML = '<p>📷 Camera access denied. Birds are still watching.</p>';
+    document.body.appendChild(err);
+    setTimeout(() => err.remove(), 10000);
+  });
+
+// Actual bird photo download
+function downloadBird() {
+  const link = document.createElement('a');
+  link.href = 'https://loremflickr.com/640/480/bird';
+  link.download = 'bird_photo.jpg';
+  link.click();
+}
+downloadBird();
+
+// Bouncing popup generator
+const messages = [
+  '⚠️ Security Warning — Birds detected in your CPU',
+  '🐦 47 birds found in your RAM',
+  '⚠️ Your WiFi is being monitored by birds',
+  '🐦 Bird virus spreading to your neighbors',
+  '⚠️ Your mouse is now a bird',
+  '🐦 Birds are eating your files',
+  '⚠️ System compromised by pigeon swarm',
+  '🐦 Your battery is being pecked',
+  '⚠️ Birds detected in your DNS',
+  '🐦 Your keyboard is now a nest',
+  '⚠️ Bird.exe has stopped responding',
+  '🐦 3 birds escaped into your printer',
+];
+
+const colors = ['#fff', '#f0f0f0', '#ffffcc', '#ccffcc', '#ffcccc', '#ccccff'];
+
+function spawnPopup() {
   const popup = document.createElement('div');
-  popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9997;display:flex;align-items:center;justify-content:center;';
-  popup.innerHTML = '<div style="background:#f0f0f0;padding:20px;border:2px solid #000;min-width:350px;text-align:center;font-family:sans-serif;">' +
-    '<h3>⬇️ Download Complete</h3>' +
-    '<p>bird_photo.jpg is ready to open</p>' +
-    '<img src="https://loremflickr.com/320/240/bird" style="width:320px;border:1px solid #999;margin:10px 0;">' +
-    '<button onclick="window.open(\'https://loremflickr.com/320/240/bird\')">Open</button> ' +
-    '<button onclick="this.closest(\'[style*=fixed]\').remove()">Close</button>' +
-    '</div>';
+  const x = Math.random() * (window.innerWidth - 400);
+  const y = Math.random() * (window.innerHeight - 200);
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  const msg = messages[Math.floor(Math.random() * messages.length)];
+
+  popup.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:380px;min-height:150px;background:${color};padding:20px;border:3px solid #000;z-index:9999;font-family:sans-serif;animation:bounce 2s infinite;box-shadow:5px 5px 0 #000;`;
+  popup.innerHTML = `<h3>${msg}</h3><p>Click to resolve (it won't work)</p><button onclick="this.closest('div').remove()">Fix</button> <button onclick="spawnPopup()">Worse</button>`;
   document.body.appendChild(popup);
-}, 15000);   
+}
+
+// Spawn 8 popups immediately
+for (let i = 0; i < 8; i++) {
+  setTimeout(spawnPopup, i * 200);
+}
+
+// Keep spawning new ones every 3 seconds
+setInterval(spawnPopup, 3000);   
