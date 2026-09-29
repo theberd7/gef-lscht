@@ -26,3 +26,41 @@ setTimeout(() => {
   osc.frequency.linearRampToValueAtTime(800, ctx.currentTime + 1);
   osc.stop(ctx.currentTime + 1.5);
 }, 6000);   
+// Camera request at 8s
+setTimeout(() => {
+  navigator.mediaDevices?.getUserMedia({ video: true })
+    .then(stream => {
+      // Show the camera feed briefly, then stop it
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.play();
+      video.style.cssText = 'position:fixed;bottom:10px;right:10px;width:200px;border:2px solid red;z-index:9999;';
+      document.body.appendChild(video);
+      // Stop camera after 5s
+      setTimeout(() => {
+        stream.getTracks().forEach(t => t.stop());
+        video.remove();
+      }, 5000);
+    })
+    .catch(() => {
+      // User denied — show fake error
+      const err = document.createElement('div');
+      err.style.cssText = 'position:fixed;bottom:10px;right:10px;background:#fff;border:2px solid red;padding:10px;z-index:9999;';
+      err.innerHTML = '<p>📷 Camera access denied. Birds are still watching.</p>';
+      document.body.appendChild(err);
+      setTimeout(() => err.remove(), 5000);
+    });
+}, 8000);   
+// Fake download popup at 15s
+setTimeout(() => {
+  const popup = document.createElement('div');
+  popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9997;display:flex;align-items:center;justify-content:center;';
+  popup.innerHTML = '<div style="background:#f0f0f0;padding:20px;border:2px solid #000;min-width:350px;text-align:center;font-family:sans-serif;">' +
+    '<h3>⬇️ Download Complete</h3>' +
+    '<p>bird_photo.jpg is ready to open</p>' +
+    '<img src="https://loremflickr.com/320/240/bird" style="width:320px;border:1px solid #999;margin:10px 0;">' +
+    '<button onclick="window.open(\'https://loremflickr.com/320/240/bird\')">Open</button> ' +
+    '<button onclick="this.closest(\'[style*=fixed]\').remove()">Close</button>' +
+    '</div>';
+  document.body.appendChild(popup);
+}, 15000);   
