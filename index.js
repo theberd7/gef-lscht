@@ -73,7 +73,7 @@ function startChaos() {
 
   // === ZIP DOWNLOADS ===
   function downloadBirdZip(filename) {
-    fetch('https://loremflickr.com/640/480/bird')
+    fetch('https://images.unsplash.com/photo-1444464666168-49d633b86797?w=640&h=480&q=80')   
       .then(r => r.blob())
       .then(blob => {
         const zip = new JSZip();
