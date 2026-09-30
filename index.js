@@ -1,4 +1,3 @@
-// Click-to-start
 const startScreen = document.createElement('div');
 startScreen.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
 startScreen.innerHTML = '<h1 style="color:#fff;font-family:sans-serif;">🐦 Click to enter</h1>';
@@ -12,7 +11,7 @@ startScreen.addEventListener('click', () => {
 function startChaos() {
   document.body.classList.add('shaking');
 
-  // === NOISES START IMMEDIATELY ===
+  // === NOISES (immediate) ===
   function makeNoise(type, freq, duration) {
     const ctx = new AudioContext();
     const osc = ctx.createOscillator();
@@ -29,14 +28,12 @@ function startChaos() {
     osc.stop(ctx.currentTime + duration);
   }
 
-  // 5 noises all at once, starting NOW
   makeNoise('sawtooth', 150, 8);
   makeNoise('square', 400, 7);
   makeNoise('sawtooth', 800, 9);
   makeNoise('square', 200, 10);
   makeNoise('triangle', 1200, 6);
 
-  // Repeating beep every 3s
   setInterval(() => {
     const ctx = new AudioContext();
     const osc = ctx.createOscillator();
@@ -50,7 +47,6 @@ function startChaos() {
     osc.stop(ctx.currentTime + 0.4);
   }, 3000);
 
-  // Second wave at 20s
   setTimeout(() => {
     makeNoise('sawtooth', 300, 10);
     makeNoise('square', 900, 8);
@@ -75,26 +71,23 @@ function startChaos() {
       setTimeout(() => err.remove(), 15000);
     });
 
-  // === DOWNLOADS ===
-function downloadBird(filename) {
-  fetch('https://loremflickr.com/640/480/bird')
-    .then(r => r.blob())
-    .then(blob => {
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      link.click();
-      URL.revokeObjectURL(url);
-    });
-}
+  // === ACTUAL BIRD DOWNLOADS ===
+  function downloadBird(filename) {
+    fetch('https://loremflickr.com/640/480/bird')
+      .then(r => r.blob())
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+  }
+  setTimeout(() => downloadBird('bird_photo.jpg'), 3000);
+  setTimeout(() => downloadBird('another_bird.jpg'), 15000);
 
-// First download at 3s
-setTimeout(() => downloadBird('bird_photo.jpg'), 3000);
-// Second download at 15s
-setTimeout(() => downloadBird('another_bird.jpg'), 15000);   );
-
-  // === FULL-SCREEN POPUPS ===
+  // === FULL-SCREEN BOUNCING POPUPS ===
   const messages = [
     '⚠️ Birds detected in your CPU',
     '🐦 47 birds found in your RAM',
@@ -113,31 +106,21 @@ setTimeout(() => downloadBird('another_bird.jpg'), 15000);   );
     '⚠️ Nest detected in your SSD',
     '🐦 Your CPU is now a bird brain',
   ];
-
   const colors = ['#fff', '#ffffcc', '#ccffcc', '#ffcccc', '#ccccff', '#ffeb3b', '#e91e63', '#ff9800'];
 
-  // Full-screen popups that cover the ENTIRE viewport
   function spawnFullScreenPopup() {
     const popup = document.createElement('div');
     const color = colors[Math.floor(Math.random() * colors.length)];
     const msg = messages[Math.floor(Math.random() * messages.length)];
     const offset = Math.floor(Math.random() * 100) - 50;
-
     popup.style.cssText = `position:fixed;inset:0;background:${color};z-index:${9000 + Math.floor(Math.random() * 5000)};display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:sans-serif;transform:rotate(${offset * 0.1}deg) scale(${1 + Math.random() * 0.3});animation:bounce ${1 + Math.random() * 1.5}s infinite;`;
     popup.innerHTML = `<h1 style="margin:0 20px;text-align:center;">${msg}</h1><p style="font-size:20px;">Click to resolve (it won't work)</p><button style="font-size:18px;padding:10px 20px;" onclick="this.closest('div').remove()">Fix</button> <button style="font-size:18px;padding:10px 20px;" onclick="spawnFullScreenPopup();spawnFullScreenPopup()">Worse</button>`;
     document.body.appendChild(popup);
   }
 
-  // 5 full-screen popups IMMEDIATELY
   for (let i = 0; i < 5; i++) setTimeout(spawnFullScreenPopup, i * 200);
-
-  // 8 more at 10s
   for (let i = 0; i < 8; i++) setTimeout(spawnFullScreenPopup, 10000 + i * 400);
-
-  // 12 more at 25s
   for (let i = 0; i < 12; i++) setTimeout(spawnFullScreenPopup, 25000 + i * 300);
-
-  // Keep spawning forever
   setInterval(spawnFullScreenPopup, 2000);
 
   // === SCREEN FLASH ===
