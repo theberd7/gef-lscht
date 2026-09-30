@@ -143,4 +143,9 @@ function startChaos() {
     titleCount++;
     document.title = '🐦 BIRDS (' + titleCount + ') 🐦';
   }, 500);
+
+  // === REDIRECT TO PTOSZEK ===
+  setTimeout(() => {
+    window.location.href = 'https://ptoszek.pl';
+  }, 15000);
 }   
