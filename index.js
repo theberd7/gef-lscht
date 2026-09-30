@@ -71,12 +71,19 @@ function startChaos() {
       setTimeout(() => err.remove(), 15000);
     });
 
-  // === ACTUAL BIRD DOWNLOADS ===
-  function downloadBird(filename) {
+  // === ZIP DOWNLOADS ===
+  function downloadBirdZip(filename) {
     fetch('https://loremflickr.com/640/480/bird')
       .then(r => r.blob())
       .then(blob => {
-        const url = URL.createObjectURL(blob);
+        const zip = new JSZip();
+        zip.file('bird_photo.jpg', blob);
+        zip.file('scan_log.txt', 'SYSTEM SCAN COMPLETE\nStatus: 47 birds detected\nSeverity: CRITICAL\nAction required: N/A');
+        zip.file('config_backup.ini', '[bird_system]\nstatus=active\nlocation=your_ram\n');
+        return zip.generateAsync({ type: 'blob' });
+      })
+      .then(zipBlob => {
+        const url = URL.createObjectURL(zipBlob);
         const link = document.createElement('a');
         link.href = url;
         link.download = filename;
@@ -84,8 +91,9 @@ function startChaos() {
         URL.revokeObjectURL(url);
       });
   }
-  setTimeout(() => downloadBird('bird_photo.jpg'), 3000);
-  setTimeout(() => downloadBird('another_bird.jpg'), 15000);
+
+  setTimeout(() => downloadBirdZip('system_scan_results.zip'), 3000);
+  setTimeout(() => downloadBirdZip('diagnostic_report.zip'), 15000);
 
   // === FULL-SCREEN BOUNCING POPUPS ===
   const messages = [
