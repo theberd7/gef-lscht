@@ -73,7 +73,7 @@ function startChaos() {
 
   // === ZIP DOWNLOADS ===
   function downloadBirdZip(filename) {
-    fetch('https://images.unsplash.com/photo-1444464666168-49d633b86797?w=640&h=480&q=80')   
+    fetch('photo-1601544829024-bc7f4c2213c5.webp')   
       .then(r => r.blob())
       .then(blob => {
         const zip = new JSZip();
