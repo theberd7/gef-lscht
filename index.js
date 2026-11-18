@@ -11,7 +11,7 @@ startScreen.addEventListener('click', () => {
 function startChaos() {
   document.body.classList.add('shaking');
 
-  // === NOISES (immediate) ===
+  
   function makeNoise(type, freq, duration) {
     const ctx = new AudioContext();
     const osc = ctx.createOscillator();
